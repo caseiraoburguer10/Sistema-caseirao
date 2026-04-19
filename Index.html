@@ -50,8 +50,10 @@
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 15px; padding: 20px; margin-bottom: 15px;
             display: flex; flex-direction: column;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
         }
+
+        .product-card:active { transform: scale(0.98); }
 
         .product-main { display: flex; justify-content: space-between; align-items: center; width: 100%; }
 
@@ -65,7 +67,6 @@
             width: 100%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); 
             border-radius: 8px; padding: 10px; color: white; font-size: 0.85rem; outline: none;
         }
-        .obs-input::placeholder { color: #888; }
 
         .add-initial { background: var(--primary); color: #000; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; }
 
@@ -78,8 +79,8 @@
             align-items: center; z-index: 999; cursor: pointer; border-top: 4px solid var(--primary); backdrop-filter: blur(10px);
         }
 
-        #modal-cart { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; }
-        .modal-content { background: #fff; color: var(--text-dark); padding: 30px; width: 95%; max-width: 550px; border-radius: 20px; max-height: 85vh; overflow-y: auto; }
+        #modal-cart { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: #fff; color: var(--text-dark); padding: 30px; width: 95%; max-width: 550px; border-radius: 20px; max-height: 90vh; overflow-y: auto; position: relative; }
         .form-group { margin-bottom: 18px; }
         .form-group label { display: block; margin-bottom: 8px; font-weight: 600; }
         .form-group input, .form-group select { width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 10px; font-size: 1rem; }
@@ -114,15 +115,15 @@
     <span id="cart-total" style="font-weight:800; color:var(--primary)">R$ 0,00</span>
 </div>
 
-<div id="modal-cart">
-    <div class="modal-content">
+<div id="modal-cart" onclick="closeModalExterno(event)">
+    <div class="modal-content" id="modal-content">
         <span class="close-btn" onclick="toggleModal()">FECHAR X</span>
         <h2 style="margin-bottom:25px; font-weight:800;">📋 Resumo do Pedido</h2>
-        <div id="cart-review" style="margin-bottom: 25px;"></div>
+        <div id="cart-review" style="margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 10px;"></div>
 
         <div class="form-group">
             <label>👤 Seu Nome:</label>
-            <input type="text" id="cust-name">
+            <input type="text" id="cust-name" placeholder="Como te chamamos?">
         </div>
         <div class="form-group">
             <label>🛵 Tipo de Pedido:</label>
@@ -171,7 +172,7 @@
         </div>
         <div class="form-group" id="change-field" style="display:none;">
             <label>💵 Troco para quanto?</label>
-            <input type="text" id="cust-change" placeholder="Ex: R$ 50,00">
+            <input type="text" id="cust-change" placeholder="Ex: 50,00">
         </div>
         <button class="checkout-btn" onclick="sendWhatsApp()">ENVIAR NO WHATSAPP 💬</button>
     </div>
@@ -179,7 +180,6 @@
 
 <script>
     const menu = [
-        // Burgers
         { id: 1, name: "Sujinho", desc: "Pão selado, carne, queijo, presunto, verduras e molho da casa.", price: 14.00, cat: "burger" },
         { id: 2, name: "Pé Pra Fora", desc: "Pão selado, carne, queijo, presunto, bacon, verduras e molho da casa.", price: 16.00, cat: "burger" },
         { id: 3, name: "Pobres", desc: "Pão selado, carne, cheddar, bacon, cebola caramelizada, verduras e molho da casa.", price: 18.00, cat: "burger" },
@@ -190,13 +190,11 @@
         { id: 8, name: "Podrão", desc: "Pão, 2 carnes, queijo, presunto, ovo, calabresa, frango, bacon, verduras e molho.", price: 30.00, cat: "burger" },
         { id: 9, name: "Mata Fome", desc: "Pão, 3 carnes, queijo duplo, presunto duplo, cheddar duplo, bacon, ovo duplo e molho.", price: 40.00, cat: "burger" },
         
-        // Batatas
         { id: 10, name: "Batata P", desc: "Porção pequena crocante.", price: 12.00, cat: "fry" },
         { id: 11, name: "Batata G", desc: "Porção grande crocante.", price: 23.00, cat: "fry" },
         { id: 12, name: "Batata P recheada", desc: "Com cheddar e bacon.", price: 17.00, cat: "fry" },
         { id: 13, name: "Batata G recheada", desc: "Com cheddar e bacon.", price: 27.00, cat: "fry" },
 
-        // Combos
         { id: 14, name: "Combo Pé Pra Fora", desc: "Lanche + Batata + Refrigerante Lata.", price: 26.00, cat: "combo" },
         { id: 15, name: "Combo Pobres", desc: "Lanche + Batata + Refrigerante Lata.", price: 28.00, cat: "combo" },
         { id: 16, name: "Combo Brutinho", desc: "Lanche + Batata + Refrigerante Lata.", price: 30.00, cat: "combo" },
@@ -206,7 +204,6 @@
         { id: 20, name: "Combo Podrão", desc: "Lanche + Batata + Refrigerante Lata.", price: 40.00, cat: "combo" },
         { id: 21, name: "Combo Mata Fome", desc: "Lanche + Batata + Refrigerante Lata.", price: 50.00, cat: "combo" },
 
-        // Bebidas
         { id: 22, name: "Coca Lata Normal", desc: "350ml", price: 6.00, cat: "drink" },
         { id: 23, name: "Coca Lata Zero", desc: "350ml", price: 6.00, cat: "drink" },
         { id: 24, name: "Fanta / Guaraná / Pepsi", desc: "Lata 350ml", price: 5.00, cat: "drink" },
@@ -228,7 +225,7 @@
                         <div id="item-ctrl-${item.id}"><button class="add-initial" onclick="changeQty(${item.id}, 1)">Adicionar</button></div>
                     </div>
                     <div class="obs-container" id="obs-cont-${item.id}">
-                        <input type="text" class="obs-input" id="obs-${item.id}" placeholder="Alguma observação? (Ex: sem cebola)">
+                        <input type="text" class="obs-input" id="obs-${item.id}" placeholder="Ex: Sem cebola, ponto da carne...">
                     </div>
                 </div>`;
         });
@@ -271,18 +268,26 @@
 
     function toggleModal() {
         const modal = document.getElementById('modal-cart');
-        if (modal.style.display === 'flex') modal.style.display = 'none';
-        else {
-            if (Object.keys(cart).length === 0) return alert("Carrinho vazio!");
+        if (modal.style.display === 'flex') {
+            modal.style.display = 'none';
+        } else {
+            if (Object.keys(cart).length === 0) return alert("Adicione itens ao carrinho primeiro!");
             modal.style.display = 'flex';
             let html = "";
             for (let id in cart) { 
                 let obsText = document.getElementById(`obs-${id}`).value;
-                let obsDisplay = obsText ? `<br><small style="color:#666">Obs: ${obsText}</small>` : "";
-                html += `<div style="display:flex; justify-content:space-between; margin-bottom:12px;"><span><strong>${cart[id].qty}x</strong> ${cart[id].name}${obsDisplay}</span><span style="font-weight:600;">R$ ${(cart[id].qty * cart[id].price).toFixed(2).replace('.',',')}</span></div>`; 
+                let obsDisplay = obsText ? `<br><small style="color:#e67e22">Obs: ${obsText}</small>` : "";
+                html += `<div style="display:flex; justify-content:space-between; margin-bottom:12px; border-bottom:1px solid #f9f9f9; padding-bottom:8px;">
+                            <span><strong>${cart[id].qty}x</strong> ${cart[id].name}${obsDisplay}</span>
+                            <span style="font-weight:600;">R$ ${(cart[id].qty * cart[id].price).toFixed(2).replace('.',',')}</span>
+                         </div>`; 
             }
             document.getElementById('cart-review').innerHTML = html;
         }
+    }
+
+    function closeModalExterno(e) {
+        if(e.target.id === 'modal-cart') toggleModal();
     }
 
     function sendWhatsApp() {
@@ -295,24 +300,34 @@
         const change = document.getElementById('cust-change').value;
         const totals = updateTotals();
 
-        if(!name) return alert("Informe seu nome.");
-        if(type === 'Entrega' && (totals.deliveryFee === 0 && neighborhoodSelect.value === "0")) return alert("Escolha um bairro.");
+        if(!name) return alert("Por favor, informe seu nome.");
+        if(type === 'Entrega') {
+            if(neighborhoodSelect.value === "0") return alert("Escolha o bairro para entrega.");
+            if(!addr) return alert("Informe seu endereço completo.");
+        }
 
-        let msg = `*NOVO PEDIDO - O CASEIRÃO* 🍔%0A%0A`;
+        let msg = `*🍔 NOVO PEDIDO - O CASEIRÃO* %0A%0A`;
         msg += `*Cliente:* ${name}%0A*Tipo:* ${type}%0A`;
+        
         if(type === 'Entrega') {
             msg += `*Bairro:* ${neighborhoodName}%0A*Endereço:* ${addr}%0A*Taxa:* R$ ${totals.deliveryFee.toFixed(2).replace('.',',')}%0A`;
         }
+        
         msg += `*Pagamento:* ${pay}%0A`;
-        if(pay === 'Dinheiro') msg += `*Troco para:* ${change}%0A`;
+        if(pay === 'Dinheiro' && change) msg += `*Troco para:* R$ ${change}%0A`;
+        
         msg += `%0A*--- ITENS ---*%0A`;
         for (let id in cart) { 
             let obsText = document.getElementById(`obs-${id}`).value;
-            msg += `• ${cart[id].qty}x ${cart[id].name}${obsText ? ' (Obs: ' + obsText + ')' : ''}%0A`; 
+            msg += `• ${cart[id].qty}x ${cart[id].name}${obsText ? ' _(Obs: ' + obsText + ')_' : ''}%0A`; 
         }
+        
         msg += `%0A*TOTAL FINAL: R$ ${totals.grandTotal.toFixed(2).replace('.',',')}*`;
-        window.open(`https://api.whatsapp.com/send?phone=5586995653888&text=${msg}`);
+        
+        const phoneNumber = "5586995653888"; 
+        window.open(`https://api.whatsapp.com/send?phone=${phoneNumber}&text=${msg}`);
     }
+
     renderMenu();
 </script>
 </body>
