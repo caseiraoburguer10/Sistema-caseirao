@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -50,14 +49,23 @@
             background: var(--card-bg);
             border: 1px solid rgba(255, 255, 255, 0.08);
             border-radius: 15px; padding: 20px; margin-bottom: 15px;
-            display: flex; justify-content: space-between; align-items: center;
+            display: flex; flex-direction: column;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
+
+        .product-main { display: flex; justify-content: space-between; align-items: center; width: 100%; }
 
         .product-info { flex: 1; padding-right: 15px; }
         .product-info h3 { font-size: 1.15rem; color: #fff; font-weight: 600; }
         .product-info p { font-size: 0.85rem; color: #aaa; margin: 6px 0 10px 0; line-height: 1.4; }
         .price { color: var(--primary); font-weight: 700; font-size: 1.25rem; }
+
+        .obs-container { margin-top: 15px; width: 100%; display: none; }
+        .obs-input { 
+            width: 100%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); 
+            border-radius: 8px; padding: 10px; color: white; font-size: 0.85rem; outline: none;
+        }
+        .obs-input::placeholder { color: #888; }
 
         .add-initial { background: var(--primary); color: #000; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; }
 
@@ -214,9 +222,14 @@
         const sections = { burger: document.getElementById('burgers-list'), fry: document.getElementById('fries-list'), combo: document.getElementById('combos-list'), drink: document.getElementById('drinks-list') };
         menu.forEach(item => {
             sections[item.cat].innerHTML += `
-                <div class="product-card">
-                    <div class="product-info"><h3>${item.name}</h3><p>${item.desc}</p><span class="price">R$ ${item.price.toFixed(2).replace('.',',')}</span></div>
-                    <div id="item-ctrl-${item.id}"><button class="add-initial" onclick="changeQty(${item.id}, 1)">Adicionar</button></div>
+                <div class="product-card" id="card-${item.id}">
+                    <div class="product-main">
+                        <div class="product-info"><h3>${item.name}</h3><p>${item.desc}</p><span class="price">R$ ${item.price.toFixed(2).replace('.',',')}</span></div>
+                        <div id="item-ctrl-${item.id}"><button class="add-initial" onclick="changeQty(${item.id}, 1)">Adicionar</button></div>
+                    </div>
+                    <div class="obs-container" id="obs-cont-${item.id}">
+                        <input type="text" class="obs-input" id="obs-${item.id}" placeholder="Alguma observação? (Ex: sem cebola)">
+                    </div>
                 </div>`;
         });
     }
@@ -225,12 +238,16 @@
         if (!cart[id]) cart[id] = { ...menu.find(m => m.id === id), qty: 0 };
         cart[id].qty += delta;
         const container = document.getElementById(`item-ctrl-${id}`);
+        const obsCont = document.getElementById(`obs-cont-${id}`);
+
         if (cart[id].qty <= 0) { 
             delete cart[id]; 
             container.innerHTML = `<button class="add-initial" onclick="changeQty(${id}, 1)">Adicionar</button>`; 
+            obsCont.style.display = "none";
         }
         else { 
             container.innerHTML = `<div class="qty-controls"><button class="btn-qty" onclick="changeQty(${id}, -1)">-</button><span style="font-weight:bold; color:#fff">${cart[id].qty}</span><button class="btn-qty" onclick="changeQty(${id}, 1)">+</button></div>`; 
+            obsCont.style.display = "block";
         }
         updateTotals();
     }
@@ -259,7 +276,11 @@
             if (Object.keys(cart).length === 0) return alert("Carrinho vazio!");
             modal.style.display = 'flex';
             let html = "";
-            for (let id in cart) { html += `<div style="display:flex; justify-content:space-between; margin-bottom:12px;"><span><strong>${cart[id].qty}x</strong> ${cart[id].name}</span><span style="font-weight:600;">R$ ${(cart[id].qty * cart[id].price).toFixed(2).replace('.',',')}</span></div>`; }
+            for (let id in cart) { 
+                let obsText = document.getElementById(`obs-${id}`).value;
+                let obsDisplay = obsText ? `<br><small style="color:#666">Obs: ${obsText}</small>` : "";
+                html += `<div style="display:flex; justify-content:space-between; margin-bottom:12px;"><span><strong>${cart[id].qty}x</strong> ${cart[id].name}${obsDisplay}</span><span style="font-weight:600;">R$ ${(cart[id].qty * cart[id].price).toFixed(2).replace('.',',')}</span></div>`; 
+            }
             document.getElementById('cart-review').innerHTML = html;
         }
     }
@@ -285,7 +306,10 @@
         msg += `*Pagamento:* ${pay}%0A`;
         if(pay === 'Dinheiro') msg += `*Troco para:* ${change}%0A`;
         msg += `%0A*--- ITENS ---*%0A`;
-        for (let id in cart) { msg += `• ${cart[id].qty}x ${cart[id].name}%0A`; }
+        for (let id in cart) { 
+            let obsText = document.getElementById(`obs-${id}`).value;
+            msg += `• ${cart[id].qty}x ${cart[id].name}${obsText ? ' (Obs: ' + obsText + ')' : ''}%0A`; 
+        }
         msg += `%0A*TOTAL FINAL: R$ ${totals.grandTotal.toFixed(2).replace('.',',')}*`;
         window.open(`https://api.whatsapp.com/send?phone=5586995653888&text=${msg}`);
     }
