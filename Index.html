@@ -24,7 +24,6 @@
             background-image: url('https://www.transparenttextures.com/patterns/black-linen.png');
         }
 
-        /* BANNER COM IMAGEM DE LANCHE */
         header {
             background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
                         url('https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=1000&auto=format&fit=crop');
@@ -38,7 +37,7 @@
         }
 
         header h1 { font-size: 2.2rem; font-weight: 800; text-transform: uppercase; letter-spacing: 3px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
-        header p { color: var(--primary); font-size: 1.1rem; font-weight: 600; margin-top: 5px; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); }
+        header p { color: var(--primary); font-size: 1.1rem; font-weight: 600; margin-top: 5px; }
 
         .container { max-width: 650px; margin: auto; padding: 20px; }
 
@@ -55,6 +54,14 @@
             border-radius: 15px; padding: 20px; margin-bottom: 15px;
             display: flex; flex-direction: column;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            position: relative; /* Para a etiqueta */
+        }
+
+        /* ETIQUETA MAIS VENDIDO */
+        .badge-pop {
+            position: absolute; top: -10px; right: 10px; background: #e74c3c;
+            color: white; font-size: 0.7rem; font-weight: 800; padding: 4px 10px;
+            border-radius: 5px; text-transform: uppercase;
         }
 
         .product-main { display: flex; justify-content: space-between; align-items: center; width: 100%; }
@@ -86,8 +93,10 @@
         .form-group { margin-bottom: 18px; }
         .form-group label { display: block; margin-bottom: 8px; font-weight: 600; }
         .form-group input, .form-group select { width: 100%; padding: 14px; border: 2px solid #ddd; border-radius: 10px; font-size: 1rem; }
-        .checkout-btn { background: var(--success); color: white; width: 100%; padding: 18px; border: none; border-radius: 12px; font-size: 1.2rem; font-weight: 700; cursor: pointer; margin-top: 20px; }
+        .checkout-btn { background: var(--success); color: white; width: 100%; padding: 18px; border: none; border-radius: 12px; font-size: 1.2rem; font-weight: 700; cursor: pointer; margin-top: 10px; }
         .close-btn { color: #e74c3c; float: right; font-weight: 700; cursor: pointer; border: 1px solid #e74c3c; padding: 5px 10px; border-radius: 8px; }
+        
+        .delivery-time { text-align: center; color: #666; font-size: 0.85rem; margin-top: 15px; font-weight: 600; }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
@@ -177,7 +186,9 @@
             <label>💵 Troco para quanto?</label>
             <input type="text" id="cust-change" placeholder="Ex: R$ 50,00">
         </div>
+        
         <button class="checkout-btn" onclick="sendWhatsApp()">ENVIAR NO WHATSAPP 💬</button>
+        <p class="delivery-time">⏱️ Entrega estimada: 40 a 60 min.</p>
     </div>
 </div>
 
@@ -190,7 +201,7 @@
         { id: 4, name: "Brutinho", desc: "Pão, anéis de cebola, queijo coalho, cheddar, carne, verduras e molho picante.", price: 20.00, cat: "burger" },
         { id: 5, name: "Demorô", desc: "Pão selado, carne, queijo, cheddar, bacon, frango, ovo e molho da casa.", price: 22.00, cat: "burger" },
         { id: 6, name: "Molecão", desc: "Pão, carne, queijo, presunto, bacon, calabresa, cebola caramelizada e molho da casa.", price: 24.00, cat: "burger" },
-        { id: 7, name: "Caseirão", desc: "Pão, carne, queijo, presunto, ovo, bacon, calabresa, batata palha, verduras e molho.", price: 27.00, cat: "burger" },
+        { id: 7, name: "Caseirão", desc: "Pão, carne, queijo, presunto, ovo, bacon, calabresa, batata palha, verduras e molho.", price: 27.00, cat: "burger", popular: true },
         { id: 8, name: "Podrão", desc: "Pão, 2 carnes, queijo, presunto, ovo, calabresa, frango, bacon, verduras e molho.", price: 30.00, cat: "burger" },
         { id: 9, name: "Mata Fome", desc: "Pão, 3 carnes, queijo duplo, presunto duplo, cheddar duplo, bacon, ovo duplo e molho.", price: 40.00, cat: "burger" },
         
@@ -206,7 +217,7 @@
         { id: 16, name: "Combo Brutinho", desc: "Lanche + Batata + Refrigerante Lata.", price: 30.00, cat: "combo" },
         { id: 17, name: "Combo Demorô", desc: "Lanche + Batata + Refrigerante Lata.", price: 32.00, cat: "combo" },
         { id: 18, name: "Combo Molecão", desc: "Lanche + Batata + Refrigerante Lata.", price: 34.00, cat: "combo" },
-        { id: 19, name: "Combo Caseirão", desc: "Lanche + Batata + Refrigerante Lata.", price: 37.00, cat: "combo" },
+        { id: 19, name: "Combo Caseirão", desc: "Lanche + Batata + Refrigerante Lata.", price: 37.00, cat: "combo", popular: true },
         { id: 20, name: "Combo Podrão", desc: "Lanche + Batata + Refrigerante Lata.", price: 40.00, cat: "combo" },
         { id: 21, name: "Combo Mata Fome", desc: "Lanche + Batata + Refrigerante Lata.", price: 50.00, cat: "combo" },
 
@@ -225,8 +236,10 @@
     function renderMenu() {
         const sections = { burger: document.getElementById('burgers-list'), fry: document.getElementById('fries-list'), combo: document.getElementById('combos-list'), drink: document.getElementById('drinks-list') };
         menu.forEach(item => {
+            const badge = item.popular ? `<span class="badge-pop">Mais Vendido</span>` : '';
             sections[item.cat].innerHTML += `
                 <div class="product-card" id="card-${item.id}">
+                    ${badge}
                     <div class="product-main">
                         <div class="product-info"><h3>${item.name}</h3><p>${item.desc}</p><span class="price">R$ ${item.price.toFixed(2).replace('.',',')}</span></div>
                         <div id="item-ctrl-${item.id}"><button class="add-initial" onclick="changeQty(${item.id}, 1)">Adicionar</button></div>
