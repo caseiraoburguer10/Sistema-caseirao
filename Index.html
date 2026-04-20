@@ -54,10 +54,22 @@
             border-radius: 15px; padding: 20px; margin-bottom: 15px;
             display: flex; flex-direction: column;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            position: relative; /* Para a etiqueta */
+            position: relative;
+            transition: all 0.3s ease; /* Transição suave geral */
         }
 
-        /* ETIQUETA MAIS VENDIDO */
+        /* --- NOVA ANIMAÇÃO DE CLIQUE --- */
+        .animar-clique {
+            animation: pulse-light 0.4s ease-out;
+            border-color: var(--primary) !important;
+        }
+
+        @keyframes pulse-light {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(243, 156, 18, 0.7); }
+            50% { transform: scale(1.02); box-shadow: 0 0 15px 5px rgba(243, 156, 18, 0.3); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(243, 156, 18, 0); }
+        }
+
         .badge-pop {
             position: absolute; top: -10px; right: 10px; background: #e74c3c;
             color: white; font-size: 0.7rem; font-weight: 800; padding: 4px 10px;
@@ -71,13 +83,20 @@
         .product-info p { font-size: 0.85rem; color: #aaa; margin: 6px 0 10px 0; line-height: 1.4; }
         .price { color: var(--primary); font-weight: 700; font-size: 1.25rem; }
 
-        .obs-container { margin-top: 15px; width: 100%; display: none; }
+        .obs-container { margin-top: 15px; width: 100%; display: none; animation: fadeIn 0.3s ease; }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .obs-input { 
             width: 100%; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); 
             border-radius: 8px; padding: 10px; color: white; font-size: 0.85rem; outline: none;
         }
 
-        .add-initial { background: var(--primary); color: #000; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; }
+        .add-initial { background: var(--primary); color: #000; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .add-initial:active { transform: scale(0.9); }
 
         .qty-controls { display: flex; align-items: center; gap: 15px; background: rgba(255, 255, 255, 0.1); padding: 8px 12px; border-radius: 10px; }
         .btn-qty { background: var(--primary); color: #000; border: none; width: 35px; height: 35px; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; }
@@ -194,7 +213,6 @@
 
 <script>
     const menu = [
-        // Burgers
         { id: 1, name: "Sujinho", desc: "Pão selado, carne, queijo, presunto, verduras e molho da casa.", price: 14.00, cat: "burger" },
         { id: 2, name: "Pé Pra Fora", desc: "Pão selado, carne, queijo, presunto, bacon, verduras e molho da casa.", price: 16.00, cat: "burger" },
         { id: 3, name: "Pobres", desc: "Pão selado, carne, cheddar, bacon, cebola caramelizada, verduras e molho da casa.", price: 18.00, cat: "burger" },
@@ -205,13 +223,11 @@
         { id: 8, name: "Podrão", desc: "Pão, 2 carnes, queijo, presunto, ovo, calabresa, frango, bacon, verduras e molho.", price: 30.00, cat: "burger" },
         { id: 9, name: "Mata Fome", desc: "Pão, 3 carnes, queijo duplo, presunto duplo, cheddar duplo, bacon, ovo duplo e molho.", price: 40.00, cat: "burger" },
         
-        // Batatas
         { id: 10, name: "Batata P", desc: "Porção pequena crocante.", price: 12.00, cat: "fry" },
         { id: 11, name: "Batata G", desc: "Porção grande crocante.", price: 23.00, cat: "fry" },
         { id: 12, name: "Batata P recheada", desc: "Com cheddar e bacon.", price: 17.00, cat: "fry" },
         { id: 13, name: "Batata G recheada", desc: "Com cheddar e bacon.", price: 27.00, cat: "fry" },
 
-        // Combos
         { id: 14, name: "Combo Pé Pra Fora", desc: "Lanche + Batata + Refrigerante Lata.", price: 26.00, cat: "combo" },
         { id: 15, name: "Combo Pobres", desc: "Lanche + Batata + Refrigerante Lata.", price: 28.00, cat: "combo" },
         { id: 16, name: "Combo Brutinho", desc: "Lanche + Batata + Refrigerante Lata.", price: 30.00, cat: "combo" },
@@ -221,7 +237,6 @@
         { id: 20, name: "Combo Podrão", desc: "Lanche + Batata + Refrigerante Lata.", price: 40.00, cat: "combo" },
         { id: 21, name: "Combo Mata Fome", desc: "Lanche + Batata + Refrigerante Lata.", price: 50.00, cat: "combo" },
 
-        // Bebidas
         { id: 22, name: "Coca Lata Normal", desc: "350ml", price: 6.00, cat: "drink" },
         { id: 23, name: "Coca Lata Zero", desc: "350ml", price: 6.00, cat: "drink" },
         { id: 24, name: "Fanta / Guaraná / Pepsi", desc: "Lata 350ml", price: 5.00, cat: "drink" },
@@ -253,6 +268,14 @@
 
     function changeQty(id, delta) {
         if (!cart[id]) cart[id] = { ...menu.find(m => m.id === id), qty: 0 };
+        
+        // --- LOGICA DA ANIMAÇÃO ---
+        const card = document.getElementById(`card-${id}`);
+        if (delta > 0) { 
+            card.classList.add('animar-clique');
+            setTimeout(() => card.classList.remove('animar-clique'), 400);
+        }
+
         cart[id].qty += delta;
         const container = document.getElementById(`item-ctrl-${id}`);
         const obsCont = document.getElementById(`obs-cont-${id}`);
